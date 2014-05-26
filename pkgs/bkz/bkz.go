@@ -45,6 +45,9 @@ func CreateBook(book *Book) bool {
 	if err != nil {
 		return false
 	}
+	
+	session.Close()
+	
 	return true
 }
 
@@ -62,6 +65,8 @@ func FindBook(bookid string) (book *Book) {
 	
 	// Finds the bookid and fills the book struct with the data
 	err = c.Find(bson.M{"id": bookid}).One(&book)
+	
+	session.Close()
 
 	return book
 }
