@@ -1,11 +1,10 @@
 package bkz
 
 import (
-	
+
 	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-
 )
 
 type Book struct {
@@ -15,7 +14,6 @@ type Book struct {
 	ISBN string
 	Genre string
 	Id string
-
 }
 
 // Creates an account and adds it to the Database
