@@ -144,32 +144,32 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 // Adds a new book to the database/user
 func bookHandler(w http.ResponseWriter, r *http.Request) {
-	
+
+	cookie, _ := r.Cookie("SessionID")
+	sessionID := cookie.Value
+	z := strings.Split(sessionID, ":")
+	username := z[0]
+
+	if !user.UpdateCollection(username, book) {
+		fmt.Println("The user: " + username + " does not exist!")
+		viewHandler(w, r)
+	}
+		
 	book := new(bkz.Book)
 	book.Title = r.FormValue("book")
 	book.Author = r.FormValue("author")
 	book.ISBN = r.FormValue("isbn")
 	book.Genre = r.FormValue("genre")
-	// TODO improve bookId, isbn is being used for testing
+	
+	// isbn is being used as Id for simplicity
 	book.Id = book.ISBN
 
 	if len(book.Title) > 0 {
 		ok := bkz.CreateBook(book)
 		if ok {
-			// TODO add a better succuess page
 			http.Redirect(w, r, "/add-book-success", http.StatusFound)
 		} else {
-			// TODO add another error page
 			http.Redirect(w, r, "/add-book-failed", http.StatusFound)
-		}
-
-		cookie, _ := r.Cookie("SessionID")
-		sessionID := cookie.Value
-		z := strings.Split(sessionID, ":")
-		username := z[0]
-
-		if !user.UpdateCollection(username, book) {
-			fmt.Println("The user: " + username + " does not exist!")
 		}
 	} else {
 		viewHandler(w, r)
