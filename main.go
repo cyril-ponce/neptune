@@ -145,11 +145,16 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 // Adds a new book to the database/user
 func bookHandler(w http.ResponseWriter, r *http.Request) {
 
-    // Parses username from the cookie
+	// Parses username from the cookie
 	cookie, _ := r.Cookie("SessionID")
 	sessionID := cookie.Value
 	z := strings.Split(sessionID, ":")
 	username := z[0]
+
+	// Checks to see if user exists
+	if !user.DoesAccountExist(username) { 
+		http.HandleFunc("/", viewHandler)
+	}
 
 	book := new(bkz.Book)
 	book.Title = r.FormValue("book")
