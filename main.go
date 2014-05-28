@@ -170,18 +170,13 @@ func bookHandler(w http.ResponseWriter, r *http.Request) {
 		// Creates new book entry in database
 		ok := bkz.CreateBook(book)
 		
-		// Redirects based on outcome
-		if ok {
-			http.Redirect(w, r, "/add-book-success", http.StatusFound)
+		// Redirects based on outcome and adds book to users collection
+		if ok && user.UpdateCollection(username, book) { 
+			http.Redirect(w, r, "/add-book-success", http.StatusFound) 
 		} else {
 			http.Redirect(w, r, "/add-book-failed", http.StatusFound)
 		}
 		
-		// Adds book to users collection
-		if !user.UpdateCollection(username, book) {
-			fmt.Println("The user: " + username + " does not exist!")
-		}
-	} else {
 		viewHandler(w, r)
 	}
 }
