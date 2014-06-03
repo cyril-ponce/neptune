@@ -11,8 +11,22 @@ type Salting_Struct struct {
 	Salt string
 }
 
+// Runs a SHA 2 function on the string
+func SHA(str string) string {
+
+	bytes := []byte(str)
+
+	// Converts string to sha2
+    	h := sha256.New()                   	// new sha256 object
+	h.Write(bytes)                  	// data is now converted to hex
+	code := h.Sum(nil)      		// code is now the hex sum
+	codestr := hex.EncodeToString(code) 	// converts hex to string
+	
+	return codestr
+}
+
 // Users username and password, outputs password + salt
-func SHA(user string, pass string) string {
+func Password(user string, pass string) string {
 
 	var password []byte
 	var username []byte
@@ -32,27 +46,15 @@ func SHA(user string, pass string) string {
     	
     	// Result with store username + password
     	result := Salting_Struct{}
-    	
-    	// Converts username to sha2
-    	u := sha256.New()                   // new sha256 object
-	u.Write(username)                   // data is now converted to hex
-	code := u.Sum(nil)                  // code is now the hex sum
-	codeusr := hex.EncodeToString(code) // converts hex to string
 	
     	// Search for the salted username, place in result the salt
-    	c.Find(bson.M{"username": codeusr}).One(&result)
-
+    	c.Find(bson.M{"username": SHA(username)}).One(&result)
+    	
+        // close mongoDB session to free resources
+    	session.Close()
+	
 	// Converts users input password + generated salt to bytes
 	password = []byte(pass + result.salt)
-
-	// Converts password + salt to sha2
-	p := sha256.New()                   // new sha256 object
-	p.Write(password)                   // data is now converted to hex
-	code = p.Sum(nil)                   // code is now the hex sum
-	codepass := hex.EncodeToString(code) // converts hex to string
-	
-        // close session to free resources
-    	session.Close()
 			
-	return codestr
+	return SHA(password)
 }
