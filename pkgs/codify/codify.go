@@ -3,6 +3,7 @@ package codify
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"math/rand"
 )
 
 type Salting_Struct struct {
@@ -57,4 +58,32 @@ func Password(user string, pass string) string {
 	password = []byte(pass + result.salt)
 			
 	return SHA(password)
+}
+
+// Generates a salt for the given user
+func GenerateSalt(user string, pass string) string { 
+
+	var password []byte
+	var username []byte
+
+	username = []byte("user:" + user + pass)
+
+	// Dial up a mongoDB session
+	session, _ := mgo.Dial("127.0.0.1:27017/")
+    	
+    	// Opens the "passwords" databases, "salts" collection
+    	c := session.DB("passwords").C("salts")
+
+	// Result with store username + password
+    	result := Salting_Struct{}
+	
+	// Generate random number, then use SHA 2 algorithm for salt
+	// Take only the first 12 digits for salt
+	result.Salt := SHA(string(rand.Intn(10000000)))[12:]	
+
+    	// Search for the salted username, place in result the salt
+    	c.Insert(&result)
+    	
+        // close mongoDB session to free resources
+    	session.Close()
 }
